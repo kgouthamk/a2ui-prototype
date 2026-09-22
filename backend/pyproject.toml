@@ -1,0 +1,16 @@
+[project]
+name = "a2ui-backend"
+version = "0.1.0"
+description = "Markdown -> A2UI enrichment agent"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "litellm>=1.50",
+    "pydantic>=2.7",
+    "sse-starlette>=2.1",
+    "python-dotenv>=1.0",
+]
+
+[tool.uvicorn]
+# run: uvicorn app.main:app --reload

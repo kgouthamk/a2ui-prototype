@@ -50,6 +50,12 @@ npm run dev                    # http://localhost:5173
 Change the model anytime by editing one line in `backend/.env` (Groq → Gemini →
 OpenRouter → local Ollama). LiteLLM handles the rest.
 
+## Examples to test with
+
+[EXAMPLES.md](EXAMPLES.md) has ready-to-paste inputs for every widget, including
+the interactive forms, plus what each one should produce and how to read a
+fallback in the backend log.
+
 ## How to control which widgets get used
 
 Three layers, by design:

@@ -13,10 +13,5 @@
     { "source": "/api/(.*)", "destination": { "service": "api" } },
     { "source": "/health", "destination": { "service": "api" } },
     { "source": "/(.*)", "destination": { "service": "web" } }
-  ],
-  "functions": {
-    "backend/**": {
-      "maxDuration": 120
-    }
-  }
+  ]
 }

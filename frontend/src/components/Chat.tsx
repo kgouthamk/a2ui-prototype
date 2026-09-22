@@ -7,7 +7,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { enrich, sendAction } from "../api/enrich";
 import { Renderer } from "../a2ui/Renderer";
 import { ActionProvider } from "../a2ui/actions";
@@ -24,6 +27,11 @@ Specs: region us-west-2, replicas 3, port 8080.
 Tags: infra, kubernetes, prod`;
 
 export default function Chat() {
+  // minRows is a plain number on TextareaAutosize — it takes no responsive object,
+  // so this has to be resolved in JS. On a phone the panels stack, and a 14-row
+  // input would push the output entirely below the fold.
+  const theme = useTheme();
+  const narrow = useMediaQuery(theme.breakpoints.down("md"));
   const [input, setInput] = useState(SAMPLE);
   const [result, setResult] = useState<EnrichResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -88,7 +96,7 @@ export default function Chat() {
         </Typography>
         <TextField
           multiline
-          minRows={14}
+          minRows={narrow ? 6 : 14}
           fullWidth
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -109,7 +117,16 @@ export default function Chat() {
       </Box>
 
       <Box>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 1 }}>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          // The standard variant does not scroll, so at 320px the second tab was
+          // clipped past the edge and unreachable.
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{ mb: 1 }}
+        >
           <Tab label="A2UI widgets" />
           <Tab label="Cleaned markdown" />
         </Tabs>
@@ -122,8 +139,15 @@ export default function Chat() {
           </ActionProvider>
         )}
         {result && tab === 1 && (
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <ReactMarkdown>{result.markdown}</ReactMarkdown>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              "& table": { display: "block", overflowX: "auto", maxWidth: "100%" },
+              "& pre": { overflowX: "auto" },
+            }}
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{result.markdown}</ReactMarkdown>
           </Paper>
         )}
       </Box>

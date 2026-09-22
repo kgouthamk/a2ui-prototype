@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import List from "@mui/material/List";
@@ -23,6 +24,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { WidgetType } from "./schema";
 import {
   A2UIButton,
@@ -89,8 +91,17 @@ export const registry: Record<
   ),
 
   MarkdownBlock: (p) => (
-    <Box sx={{ "& p": { mb: 1 } }}>
-      <ReactMarkdown>{p.markdown ?? ""}</ReactMarkdown>
+    <Box
+      sx={{
+        "& p": { mb: 1 },
+        // A GFM table inside markdown is still a table: let it scroll in place
+        // rather than stretching the page on a phone.
+        "& table": { display: "block", overflowX: "auto", maxWidth: "100%" },
+        "& pre": { overflowX: "auto" },
+        "& img": { maxWidth: "100%" },
+      }}
+    >
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{p.markdown ?? ""}</ReactMarkdown>
     </Box>
   ),
 
@@ -134,8 +145,11 @@ export const registry: Record<
     );
   },
 
+  // Wrapped in TableContainer: a bare Table cannot shrink below its content and
+  // would push the whole page wide on a narrow screen. This scrolls it in place.
   Table: (p) => (
-    <Table size="small" sx={{ mb: 1 }}>
+    <TableContainer sx={{ mb: 1, maxWidth: "100%" }}>
+      <Table size="small">
       <TableHead>
         <TableRow>
           {(p.columns ?? []).map((c: string, i: number) => (
@@ -154,7 +168,8 @@ export const registry: Record<
           </TableRow>
         ))}
       </TableBody>
-    </Table>
+      </Table>
+    </TableContainer>
   ),
 
   // A definition list, not a stack of ListItems: the label reads as the label and

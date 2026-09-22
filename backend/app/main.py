@@ -4,6 +4,7 @@ It only calls agent.enrich() — that is the ADK-migration seam.
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +12,10 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 from app import agent
+
+# uvicorn only attaches handlers to its own loggers, so app-level logs are dropped
+# by default. The agent logs WHY it fell back — that needs to reach the terminal.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
 app = FastAPI(title="A2UI Prototype")
 

@@ -12,6 +12,7 @@ export const WIDGET_TYPES = [
   "Table",
   "KeyValueList",
   "ChipGroup",
+  "Grid",
   "Heading",
   "Text",
   "MarkdownBlock",

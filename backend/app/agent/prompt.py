@@ -22,6 +22,8 @@ Widget catalog and when to use each:
 - Accordion: collapsible Q&A or long optional detail. props: { "panels": [{ "summary": string, "detail": string }] }
 - List: an unordered set of items. props: { "items": string[] }
 - Divider: a visual separator. props: {}
+- Grid: lays its CHILDREN out side by side. Use it to show several Cards as a
+  stack of cards. props: { "columns": 1-4 }  children: usually Card nodes
 
 Interactive widgets — ONLY use these when the input asks the reader to decide,
 choose, confirm, or supply something. Never invent a form for static content.
@@ -46,6 +48,10 @@ Selection rules:
 - Tags, keywords, categories -> ChipGroup.
 - FAQ or long optional detail -> Accordion.
 - Prefer 1 Card at the root containing a few well-chosen widgets.
+- EXCEPTION: when the content is a set of comparable items (plans, products,
+  people, regions, incidents), emit one Card PER ITEM as children of a Grid, and
+  make that Grid the root. Each Card gets its own Heading plus a KeyValueList or
+  Text. This is the "stack of cards" layout.
 - NEVER invent facts. Every value must come from the input markdown.
 """
 

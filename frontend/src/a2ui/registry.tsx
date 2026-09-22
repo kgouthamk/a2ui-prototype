@@ -43,7 +43,10 @@ export const registry: Record<
   (props: P, children: ReactNode, action?: string | null) => ReactNode
 > = {
   Card: (_p, children) => (
-    <Card variant="outlined" sx={{ mb: 2 }}>
+    // containerType lets descendants query THIS card's width. Three cards across a
+    // half-width panel are narrow even on a big screen, and a viewport media query
+    // cannot see that.
+    <Card variant="outlined" sx={{ mb: 2, containerType: "inline-size" }}>
       <CardContent>{children}</CardContent>
     </Card>
   ),
@@ -107,6 +110,30 @@ export const registry: Record<
 
   Divider: () => <Divider sx={{ my: 2 }} />,
 
+  // Lays its children out side by side — the thing that turns several Cards into a
+  // stack of cards rather than a column of them. Collapses to one column on narrow
+  // screens. Children arrive wrapped in a div by the Renderer, hence the `& > div`.
+  Grid: (p, children) => {
+    const cols = Math.min(4, Math.max(1, Number(p.columns) || 2));
+    return (
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: `repeat(${cols}, minmax(0, 1fr))`,
+          },
+          gap: 2,
+          mb: 2,
+          // Cards carry their own bottom margin; inside a grid the gap governs.
+          "& > div > *": { mb: 0, height: "100%" },
+        }}
+      >
+        {children}
+      </Box>
+    );
+  },
+
   Table: (p) => (
     <Table size="small" sx={{ mb: 1 }}>
       <TableHead>
@@ -138,10 +165,17 @@ export const registry: Record<
       component="dl"
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "1fr", sm: "minmax(110px, max-content) 1fr" },
-        columnGap: 3,
+        gridTemplateColumns: { xs: "1fr", sm: "minmax(0, max-content) minmax(0, 1fr)" },
+        columnGap: 2,
         rowGap: 1,
         my: 1,
+        // Too narrow for two columns (e.g. inside a card in a 3-up Grid): stack the
+        // label above its value instead of hyphenating both into unreadable strips.
+        "@container (max-width: 300px)": {
+          gridTemplateColumns: "1fr",
+          rowGap: 0.25,
+          "& dd": { mb: 1 },
+        },
       }}
     >
       {(p.items ?? []).map((it: { key: string; value: string }, i: number) => (
@@ -149,7 +183,11 @@ export const registry: Record<
           <Typography component="dt" variant="body2" color="text.secondary">
             {it.key}
           </Typography>
-          <Typography component="dd" variant="body2" sx={{ m: 0, fontWeight: 500 }}>
+          <Typography
+            component="dd"
+            variant="body2"
+            sx={{ m: 0, fontWeight: 500, overflowWrap: "break-word" }}
+          >
             {it.value}
           </Typography>
         </Fragment>

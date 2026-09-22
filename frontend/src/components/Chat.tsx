@@ -75,7 +75,13 @@ export default function Chat() {
   );
 
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr" }, gap: 2 }}>
+    <Box sx={{
+        display: "grid",
+        // minmax(0,…) not 1fr: a default grid column will not shrink below its
+        // content's min-width, so a wide card stack would push this panel past 50%.
+        gridTemplateColumns: { md: "minmax(0, 1fr) minmax(0, 1fr)" },
+        gap: 2,
+      }}>
       <Box>
         <Typography variant="subtitle1" gutterBottom>
           Markdown input

@@ -31,6 +31,7 @@ class WidgetType(str, Enum):
     TABLE = "Table"
     KEY_VALUE_LIST = "KeyValueList"
     CHIP_GROUP = "ChipGroup"
+    GRID = "Grid"
     # Leaves
     HEADING = "Heading"
     TEXT = "Text"

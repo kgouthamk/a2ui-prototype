@@ -78,6 +78,59 @@ Show me a button that says "Click me" with no action attached to it.
 
 ---
 
+## Cards and card stacks
+
+A single `Card` is the default root, so almost any input produces one. To get
+*several* cards side by side, give the model a set of comparable items — the
+prompt routes those to a `Grid` of one Card per item.
+
+### 11. Pricing plans — a stack of cards
+
+Expect `Grid(columns=3)` wrapping three `Card`s, each with its own `Heading` and
+`KeyValueList`. The model picks the column count itself.
+
+```markdown
+# Pricing Plans
+
+**Basic** - $10/month. 1 seat. Community support. 5 GB storage.
+
+**Pro** - $30/month. 5 seats. Email support. 100 GB storage.
+
+**Enterprise** - $120/month. Unlimited seats. Dedicated support. 1 TB storage.
+```
+
+### 12. Regional status — cards with alerts
+
+```markdown
+# Fleet Status by Region
+
+**us-east-1** - Healthy. 42 nodes. p99 latency 120 ms. Last deploy Oct 1.
+
+**eu-west-2** - Degraded. 18 nodes. p99 latency 850 ms. Warning: elevated error
+rate since 14:00 UTC.
+
+**ap-south-1** - Healthy. 7 nodes. p99 latency 210 ms. Last deploy Sep 28.
+```
+
+### 13. Team roster
+
+```markdown
+# On-call Rotation
+
+**Priya Raman** - Platform. Primary this week. Reachable on +44 7700 900111.
+
+**Diego Alvarez** - Payments. Secondary this week. Reachable on +1 555 0142.
+
+**Mei Lin** - Data. Escalation only. Reachable on +65 8123 4567.
+```
+
+> **Carousel:** not available. Material UI ships no carousel component, in Core or
+> X, so there is nothing to map a `Carousel` widget onto without adding a
+> third-party dependency. `Grid` is the closest thing today; it wraps to one
+> column on narrow screens rather than scrolling horizontally.
+
+---
+
 ## Presentational
 
 ### 5. Widest catalog coverage

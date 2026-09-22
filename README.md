@@ -58,6 +58,9 @@ fallback in the backend log.
 
 ## Deploy to Vercel
 
+Live: **https://a2ui-prototype.vercel.app**  (deploys automatically on push to `main`)
+
+
 `vercel.json` defines two [Services](https://vercel.com/docs/services) — the Vite SPA
 at `frontend/` and the FastAPI app at `backend/` — built separately and served from
 one domain. `/api/*` routes to the backend, everything else to the SPA. Because they

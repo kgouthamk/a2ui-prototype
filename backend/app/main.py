@@ -1,5 +1,5 @@
 """FastAPI app. NOTE: this file does not import litellm or any model client.
-It only calls agent.enrich() — that is the ADK-migration seam.
+It only calls agent.enrich() / agent.act() — that is the ADK-migration seam.
 """
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from app import agent
@@ -34,16 +34,40 @@ class EnrichRequest(BaseModel):
     markdown: str
 
 
+class ActionRequest(BaseModel):
+    """A UI action dispatched by the client.
+
+    `markdown` is the original source document, echoed back by the client. The
+    server holds no session: the client owns the context, which keeps this endpoint
+    as stateless as /api/enrich.
+    """
+
+    action: str
+    values: dict[str, object] = Field(default_factory=dict)
+    markdown: str
+
+
 @app.get("/health")
 def health() -> dict:
     return {"ok": True}
 
 
-@app.post("/api/enrich")
-async def enrich_endpoint(req: EnrichRequest) -> EventSourceResponse:
+def _sse(result_fn) -> EventSourceResponse:
+    """Both endpoints stream the same single `result` event holding an EnrichResult."""
+
     async def stream():
-        # enrich() is sync/blocking; run it off the event loop.
-        result = await asyncio.to_thread(agent.enrich, req.markdown)
+        # The agent is sync/blocking; run it off the event loop.
+        result = await asyncio.to_thread(result_fn)
         yield {"event": "result", "data": result.model_dump_json()}
 
     return EventSourceResponse(stream())
+
+
+@app.post("/api/enrich")
+async def enrich_endpoint(req: EnrichRequest) -> EventSourceResponse:
+    return _sse(lambda: agent.enrich(req.markdown))
+
+
+@app.post("/api/action")
+async def action_endpoint(req: ActionRequest) -> EventSourceResponse:
+    return _sse(lambda: agent.act(req.markdown, req.action, req.values))

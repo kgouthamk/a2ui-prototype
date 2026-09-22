@@ -16,7 +16,7 @@ function renderNode(node: A2UINode, key: number): ReactNode {
   const children = (node.children ?? []).map((c, i) => renderNode(c, i));
   const render = registry[node.type];
   if (!render) return <FallbackNode key={key} type={node.type} />;
-  return <div key={key}>{render(node.props ?? {}, children)}</div>;
+  return <div key={key}>{render(node.props ?? {}, children, node.action)}</div>;
 }
 
 /** Validate the tree, then render it. Invalid payloads degrade gracefully. */

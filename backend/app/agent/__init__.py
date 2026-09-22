@@ -1,3 +1,4 @@
-from app.agent.enrich import enrich
+"""Agent package. The web layer imports ONLY these names."""
+from app.agent.enrich import act, enrich
 
-__all__ = ["enrich"]
+__all__ = ["enrich", "act"]

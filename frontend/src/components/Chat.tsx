@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -8,8 +8,9 @@ import Paper from "@mui/material/Paper";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import ReactMarkdown from "react-markdown";
-import { enrich } from "../api/enrich";
+import { enrich, sendAction } from "../api/enrich";
 import { Renderer } from "../a2ui/Renderer";
+import { ActionProvider } from "../a2ui/actions";
 import type { EnrichResult } from "../a2ui/schema";
 
 const SAMPLE = `# Deployment Guide
@@ -29,17 +30,49 @@ export default function Chat() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState(0);
 
+  // Form state for interactive widgets, plus the document the current tree was
+  // built from. The server keeps no session, so the client echoes `source` back
+  // with every action to give the agent its facts.
+  const [values, setValues] = useState<Record<string, unknown>>({});
+  const [source, setSource] = useState("");
+
+  const setValue = useCallback((name: string, value: unknown) => {
+    setValues((v) => ({ ...v, [name]: value }));
+  }, []);
+
   async function onSend() {
     setLoading(true);
     setError(null);
+    setValues({}); // a new tree means new fields; stale values would leak across
     try {
       setResult(await enrich(input));
+      setSource(input);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
   }
+
+  const dispatch = useCallback(
+    async (action: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        setResult(await sendAction(action, values, source));
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [values, source]
+  );
+
+  const ctx = useMemo(
+    () => ({ values, setValue, dispatch, pending: loading }),
+    [values, setValue, dispatch, loading]
+  );
 
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr" }, gap: 2 }}>
@@ -77,7 +110,11 @@ export default function Chat() {
         {!result && (
           <Typography color="text.secondary">Output appears here.</Typography>
         )}
-        {result && tab === 0 && <Renderer node={result.a2ui} />}
+        {result && tab === 0 && (
+          <ActionProvider value={ctx}>
+            <Renderer node={result.a2ui} />
+          </ActionProvider>
+        )}
         {result && tab === 1 && (
           <Paper variant="outlined" sx={{ p: 2 }}>
             <ReactMarkdown>{result.markdown}</ReactMarkdown>

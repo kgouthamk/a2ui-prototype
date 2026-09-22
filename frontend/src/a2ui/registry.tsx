@@ -24,6 +24,13 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReactMarkdown from "react-markdown";
 import type { WidgetType } from "./schema";
+import {
+  A2UIButton,
+  A2UICheckbox,
+  A2UISelect,
+  A2UISwitch,
+  A2UITextField,
+} from "./interactive";
 
 type P = Record<string, any>;
 
@@ -33,7 +40,7 @@ type P = Record<string, any>;
  */
 export const registry: Record<
   WidgetType,
-  (props: P, children: ReactNode) => ReactNode
+  (props: P, children: ReactNode, action?: string | null) => ReactNode
 > = {
   Card: (_p, children) => (
     <Card variant="outlined" sx={{ mb: 2 }}>
@@ -187,4 +194,12 @@ export const registry: Record<
       )}
     </Box>
   ),
+
+  // Interactive. These are real components, not inline render functions, so they
+  // can use hooks to reach the action context (see actions.tsx).
+  Button: (p, _children, action) => <A2UIButton {...p} action={action} />,
+  TextField: (p) => <A2UITextField {...p} />,
+  Select: (p) => <A2UISelect {...p} />,
+  Checkbox: (p) => <A2UICheckbox {...p} />,
+  Switch: (p) => <A2UISwitch {...p} />,
 };

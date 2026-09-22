@@ -74,3 +74,47 @@ def test_nested_children_recurse():
         }
     )
     assert node.children[0].children[0].type == WidgetType.TEXT
+
+
+# --- contract parity + the action field -------------------------------------
+
+SCHEMA_TS = os.path.join(
+    os.path.dirname(__file__), "..", "..", "frontend", "src", "a2ui", "schema.ts"
+)
+
+
+def test_python_and_typescript_catalogs_match():
+    """The two schemas ARE the contract, and drift between them is silent.
+
+    Zod strips unknown fields rather than erroring, so a widget added on one side
+    only would render as a FallbackNode (or vanish) with nothing failing.
+    """
+    import re
+
+    src = open(SCHEMA_TS).read()
+    block = re.search(r"WIDGET_TYPES = \[(.*?)\] as const", src, re.S)
+    assert block, "could not find WIDGET_TYPES in schema.ts"
+    ts = set(re.findall(r'"(\w+)"', block.group(1)))
+    py = {w.value for w in WidgetType}
+    assert ts == py, f"only in TS: {ts - py} | only in Python: {py - ts}"
+
+
+def test_action_is_kept_on_button():
+    node = A2UINode.model_validate(
+        {"type": "Button", "props": {"label": "Go"}, "action": "submit_claim"}
+    )
+    assert node.action == "submit_claim"
+
+
+def test_action_is_dropped_from_non_actionable_widgets():
+    # Rendering a control that looks live but dispatches nothing is the failure
+    # mode this guards; the agent logs a warning when it strips one.
+    node = A2UINode.model_validate(
+        {"type": "Text", "props": {"text": "hi"}, "action": "submit_claim"}
+    )
+    assert node.action is None
+
+
+def test_interactive_widgets_are_on_the_catalog():
+    for w in ("Button", "TextField", "Select", "Checkbox", "Switch"):
+        assert w in ALLOWED

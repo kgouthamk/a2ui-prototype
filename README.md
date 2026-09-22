@@ -50,6 +50,12 @@ npm run dev                    # http://localhost:5173
 Change the model anytime by editing one line in `backend/.env` (Groq → Gemini →
 OpenRouter → local Ollama). LiteLLM handles the rest.
 
+## Using this with your own design system
+
+[ADOPTING.md](ADOPTING.md) covers what to change (essentially just the registry),
+a starter prompt for Claude Code, and the five failure modes that cost this project
+real time — silent fallbacks, evals that pass on them, and retired model names.
+
 ## Examples to test with
 
 [EXAMPLES.md](EXAMPLES.md) has ready-to-paste inputs for every widget, including

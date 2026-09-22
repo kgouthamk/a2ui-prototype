@@ -56,6 +56,43 @@ OpenRouter → local Ollama). LiteLLM handles the rest.
 the interactive forms, plus what each one should produce and how to read a
 fallback in the backend log.
 
+## Deploy to Vercel
+
+`vercel.json` defines two [Services](https://vercel.com/docs/services) — the Vite SPA
+at `frontend/` and the FastAPI app at `backend/` — built separately and served from
+one domain. `/api/*` routes to the backend, everything else to the SPA. Because they
+share an origin, the browser makes same-origin calls and CORS never applies.
+
+One-time setup (the dashboard, not the CLI — importing the repo also wires up
+deploy-on-push):
+
+1. [vercel.com/new](https://vercel.com/new) -> import `kgouthamk/a2ui-prototype`
+2. Leave the root directory as the repo root. `vercel.json` handles both services;
+   do **not** set a framework preset or root override.
+3. Add environment variables (Settings -> Environment Variables):
+
+   | Name | Value |
+   |---|---|
+   | `A2UI_MODEL` | `groq/openai/gpt-oss-120b` |
+   | `GROQ_API_KEY` | your key |
+
+   Leave `VITE_API_URL` unset — in a production build the client defaults to the
+   same origin.
+4. Deploy.
+
+### Before you share the URL
+
+The deployed demo runs on **your** API key, and every visitor spends your quota.
+Free tiers are small (Gemini AI Studio allows 20 requests/day; Groq rate-limits a
+burst of under ten). Past the limit the UI does not error — it shows the
+plain-markdown fallback, which looks like the app is broken.
+
+For anything beyond a handful of viewers, use a paid key or add a per-IP cap.
+
+To run the demo with no key at all, set `A2UI_DEMO=1`. It returns one fixed rich
+sample: safe to share, but not real inference, and the interactive forms will not
+round-trip (`act()` deliberately ignores demo mode).
+
 ## How to control which widgets get used
 
 Three layers, by design:

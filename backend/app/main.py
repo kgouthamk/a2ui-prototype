@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,9 +23,18 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(messag
 
 app = FastAPI(title="A2UI Prototype")
 
+# On Vercel the SPA and this API are served from one domain, so requests are
+# same-origin and none of this applies. It matters for local dev, and for anyone
+# hosting the two separately — hence the env override rather than a hardcoded host.
+ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.getenv("A2UI_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )

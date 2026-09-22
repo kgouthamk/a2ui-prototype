@@ -1,6 +1,11 @@
 import { EnrichResult, EnrichResultSchema } from "../a2ui/schema";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+// In production the SPA and the API share one Vercel domain (see vercel.json's
+// rewrites), so "" makes every call same-origin and CORS never comes into play.
+// Locally they are on different ports, hence the dev default.
+const API =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.PROD ? "" : "http://localhost:8000");
 
 /** Read the single SSE `result` event from a POST, validate it, return it. */
 async function postForResult(path: string, body: unknown): Promise<EnrichResult> {

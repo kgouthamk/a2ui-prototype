@@ -81,7 +81,11 @@ def _run(messages: list[dict], markdown: str, *, what: str) -> EnrichResult:
     broken key fails the run loudly rather than scoring the fallback.
     """
     strict = bool(os.getenv("A2UI_STRICT"))
-    attempts = 1 + max(0, int(os.getenv("A2UI_RETRIES", "1")))
+    # Default 2 retries (3 attempts). Groq's constrained-JSON decoder failed about
+    # a third of long trees in measurement, and a single retry still left roughly
+    # one call in nine falling back — visible as a form that sometimes just reverts
+    # to plain markdown. Retries only cost a request when something already failed.
+    attempts = 1 + max(0, int(os.getenv("A2UI_RETRIES", "2")))
 
     kwargs = {
         "model": MODEL,

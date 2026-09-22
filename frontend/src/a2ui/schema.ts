@@ -25,7 +25,10 @@ export interface A2UINode {
   children: A2UINode[];
 }
 
-export const A2UINodeSchema: z.ZodType<A2UINode> = z.lazy(() =>
+// Input type is `unknown`, not A2UINode: `props`/`children` have .default(), so
+// they are optional on the way IN and guaranteed on the way OUT. Annotating both
+// sides as A2UINode makes the two disagree and fails the build.
+export const A2UINodeSchema: z.ZodType<A2UINode, z.ZodTypeDef, unknown> = z.lazy(() =>
   z.object({
     type: z.enum(WIDGET_TYPES),
     props: z.record(z.unknown()).default({}),

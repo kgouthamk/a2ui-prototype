@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
@@ -14,7 +14,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
@@ -53,11 +52,25 @@ export const registry: Record<
     </Box>
   ),
 
-  Heading: (p) => (
-    <Typography variant={`h${Math.min(6, Math.max(1, p.level ?? 5))}` as any} gutterBottom>
-      {p.text}
-    </Typography>
-  ),
+  // MUI's h1-h3 are hero/display sizes — mapping a markdown level straight onto
+  // them renders a `###` section title at ~3rem inside a card. Scale the visual
+  // variant down by three steps while keeping the semantic tag accurate.
+  Heading: (p) => {
+    const level = Math.min(6, Math.max(1, p.level ?? 3));
+    const variant = (["h4", "h5", "h6", "subtitle1", "subtitle2", "subtitle2"] as const)[
+      level - 1
+    ];
+    return (
+      <Typography
+        variant={variant}
+        component={`h${level}` as any}
+        gutterBottom
+        sx={{ fontWeight: 600 }}
+      >
+        {p.text}
+      </Typography>
+    );
+  },
 
   Text: (p) => (
     <Typography variant="body1" sx={{ mb: 1 }}>
@@ -110,14 +123,31 @@ export const registry: Record<
     </Table>
   ),
 
+  // A definition list, not a stack of ListItems: the label reads as the label and
+  // the value as the value. The previous version passed value as `primary` and key
+  // as `secondary`, which rendered every fact upside down.
   KeyValueList: (p) => (
-    <List dense>
+    <Box
+      component="dl"
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", sm: "minmax(110px, max-content) 1fr" },
+        columnGap: 3,
+        rowGap: 1,
+        my: 1,
+      }}
+    >
       {(p.items ?? []).map((it: { key: string; value: string }, i: number) => (
-        <ListItem key={i} disableGutters>
-          <ListItemText primary={it.value} secondary={it.key} />
-        </ListItem>
+        <Fragment key={i}>
+          <Typography component="dt" variant="body2" color="text.secondary">
+            {it.key}
+          </Typography>
+          <Typography component="dd" variant="body2" sx={{ m: 0, fontWeight: 500 }}>
+            {it.value}
+          </Typography>
+        </Fragment>
       ))}
-    </List>
+    </Box>
   ),
 
   List: (p) => (

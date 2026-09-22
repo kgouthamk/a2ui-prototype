@@ -25,8 +25,9 @@ logger = logging.getLogger(__name__)
 # root instead of backend/. Pin it to backend/.env. Existing env vars win.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
-# Default: Google Gemini (AI Studio free tier). Needs GEMINI_API_KEY (starts "AIza").
-MODEL = os.getenv("A2UI_MODEL", "gemini/gemini-2.0-flash")
+# Default: Google Gemini (AI Studio free tier). Needs GEMINI_API_KEY.
+# gemini-2.0-flash was retired and now 404s — the API names 3.6-flash as its successor.
+MODEL = os.getenv("A2UI_MODEL", "gemini/gemini-3.6-flash")
 # Only used by local providers (e.g. ollama); harmless otherwise.
 API_BASE = os.getenv("A2UI_API_BASE", "http://localhost:11434")
 

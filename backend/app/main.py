@@ -15,7 +15,10 @@ from app import agent
 
 # uvicorn only attaches handlers to its own loggers, so app-level logs are dropped
 # by default. The agent logs WHY it fell back — that needs to reach the terminal.
-logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+# force=True because basicConfig is a no-op once any import has claimed the root
+# logger — litellm is imported (via app.agent) before this line runs.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s",
+                    force=True)
 
 app = FastAPI(title="A2UI Prototype")
 

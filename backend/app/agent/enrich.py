@@ -31,6 +31,16 @@ MODEL = os.getenv("A2UI_MODEL", "gemini/gemini-2.0-flash")
 API_BASE = os.getenv("A2UI_API_BASE", "http://localhost:11434")
 
 
+def _temperature() -> float:
+    """Read A2UI_TEMPERATURE; a typo in .env should not 500 the endpoint."""
+    raw = os.getenv("A2UI_TEMPERATURE", "0")
+    try:
+        return float(raw)
+    except ValueError:
+        logger.warning("enrich: ignoring non-numeric A2UI_TEMPERATURE=%r; using 0", raw)
+        return 0.0
+
+
 def _fallback(markdown: str, reason: str) -> EnrichResult:
     """Never crash the UI: if the model misbehaves, show the markdown plainly.
 
@@ -65,7 +75,7 @@ def enrich(markdown: str) -> EnrichResult:
         "model": MODEL,
         "messages": build_messages(markdown),
         "response_format": {"type": "json_object"},
-        "temperature": float(os.getenv("A2UI_TEMPERATURE", "0")),
+        "temperature": _temperature(),
     }
     # Ollama (and other local providers) need an explicit api_base.
     if MODEL.startswith("ollama"):
